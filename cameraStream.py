@@ -12,15 +12,13 @@ import numpy
 # hostname of your server)
 client_socket = socket.socket()
 client_socket.connect(('192.168.10.252', 8000))
-
-# Make a file-like object out of the connection
-connection = client_socket.makefile('wb')
 try:
     camera = picamera2.PiCamera2()
-    camera.resolution = (640, 480)
+
     # Start a preview and let the camera warm up for 2 seconds
     camera.start()
-    time.sleep(2)
+    time.sleep(1)
+    image = camera.capture_array()
 
     # Note the start time and construct a stream to hold image data
     # temporarily (we could write it directly to connection but in this
@@ -45,6 +43,11 @@ try:
         stream.truncate()
     # Write a length of zero to the stream to signal we're done
     connection.write(struct.pack('<L', 0))
+except Exception as e:
+    connection.write(struct.pack('<L', 0))
+    connection.close()
+    client_socket.close()
+    raise e
 finally:
     connection.close()
     client_socket.close()

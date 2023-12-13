@@ -1,34 +1,34 @@
-import io
-import socket
-import struct
-from PIL import Image
 
-# Start a socket listening for connections on 0.0.0.0:8000 (0.0.0.0 means
-# all interfaces)
-server_socket = socket.socket()
-server_socket.bind(('0.0.0.0', 8000))
-server_socket.listen(0)
+# This is client code to receive video frames over UDP
+import cv2, imutils, socket
+import numpy as np
+import time
+import base64
 
-# Accept a single connection and make a file-like object out of it
-connection = server_socket.accept()[0].makefile('rb')
-try:
-    while True:
-        # Read the length of the image as a 32-bit unsigned int. If the
-        # length is zero, quit the loop
-        image_len = struct.unpack('<L', connection.read(struct.calcsize('<L')))[0]
-        if not image_len:
-            break
-        # Construct a stream to hold the image data and read the image
-        # data from the connection
-        image_stream = io.BytesIO()
-        image_stream.write(connection.read(image_len))
-        # Rewind the stream, open it as an image with PIL and do some
-        # processing on it
-        image_stream.seek(0)
-        image = Image.open(image_stream)
-        print('Image is %dx%d' % image.size)
-        image.verify()
-        print('Image is verified')
-finally:
-    connection.close()
-    server_socket.close()
+BUFF_SIZE = 65536
+client_socket = socket.socket(socket.AF_INET,socket.SOCK_DGRAM)
+client_socket.setsockopt(socket.SOL_SOCKET,socket.SO_RCVBUF,BUFF_SIZE)
+
+host_ip = "192.168.10.255"
+print(host_ip)
+
+port = 9999
+message = b'Hello'
+
+client_socket.sendto(message,(host_ip,port))
+
+while True:
+    packet,_ = client_socket.recvfrom(BUFF_SIZE)
+
+    data = base64.b64decode(packet,' /')
+
+    if data == "terminate":
+        exit()
+
+    npdata = np.fromstring(data,dtype=np.uint8)
+    frame = cv2.imdecode(npdata,1)
+    cv2.imshow("RECEIVING VIDEO",frame)
+    key = cv2.waitKey(1) & 0xFF
+    if key == ord('q'):
+        client_socket.close()
+        break
