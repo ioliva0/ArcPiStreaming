@@ -12,6 +12,9 @@ import numpy
 # hostname of your server)
 client_socket = socket.socket()
 client_socket.connect(('192.168.10.252', 8000))
+
+connection = client_socket.makefile('wb')
+
 try:
     camera = picamera2.PiCamera2()
 
