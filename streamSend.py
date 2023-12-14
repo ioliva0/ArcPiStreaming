@@ -21,12 +21,28 @@ while (cv2.waitKey(10) & 0xFF) != ord("q"):
     try:
         msg,client_addr = server_socket.recvfrom(1024)
     except Exception as e:
+        server_socket.sendto(b'terminate',client_addr)
         server_socket.close()
         raise e
     print('GOT connection from ',client_addr)
 
     encoded,buffer = cv2.imencode('.jpg', image, [cv2.IMWRITE_JPEG_QUALITY,80])
     message = base64.b64encode(buffer)
-    server_socket.sendto(message,client_addr)
+
+    packet_id = 0
+
+    server_socket.sendto(b'START',client_addr)
+    
+    while len(message) > 0:
+        message_packet = str(packet_id).encode() + b"|" + message[:1000]
+
+        server_socket.sendto(message_packet, client_addr)
+
+        print(message_packet)
+
+        message = message[1000:]
+        packet_id += 1
+    
+    server_socket.sendto(b'FIN',client_addr)
 
     cv2.imshow('TRANSMITTING VIDEO',image)
