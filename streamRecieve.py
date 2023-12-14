@@ -9,16 +9,19 @@ BUFF_SIZE = 65536
 client_socket = socket.socket(socket.AF_INET,socket.SOCK_DGRAM)
 client_socket.setsockopt(socket.SOL_SOCKET,socket.SO_RCVBUF,BUFF_SIZE)
 
-host_ip = "192.168.10.255"
+host_ip = "192.168.10.250"
 print(host_ip)
 
 port = 9999
-message = b'Hello'
 
-client_socket.sendto(message,(host_ip,port))
+client_socket.sendto(b'Hello',(host_ip,port))
 
 while True:
+
+
     packet,_ = client_socket.recvfrom(BUFF_SIZE)
+
+    client_socket.sendto(b'Recieved',(host_ip,port))
 
     data = base64.b64decode(packet,' /')
 
