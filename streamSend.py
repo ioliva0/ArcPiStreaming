@@ -1,7 +1,7 @@
 import picamera2
 
 # This is server code to send video frames over UDP
-import cv2, imutils, socket
+import cv2, socket
 import numpy as np
 import time
 import base64
@@ -10,16 +10,19 @@ BUFF_SIZE = 65536
 server_socket = socket.socket(socket.AF_INET,socket.SOCK_DGRAM)
 server_socket.setsockopt(socket.SOL_SOCKET,socket.SO_RCVBUF,BUFF_SIZE)
 
-server_socket.bind(('192.168.1.102', 9999))
+server_socket.bind(('0.0.0.0', 9999))
 
-camera = picamera2.PiCamera2()
+camera = picamera2.Picamera2()
 camera.start()
-time.sleep(1)
+time.sleep(2)
 
-while (cv2.getKey(10) & 0xFF) != ord("q"):
+while (cv2.waitKey(10) & 0xFF) != ord("q"):
     image = camera.capture_array()
-    
-    msg,client_addr = server_socket.recvfrom(BUFF_SIZE)
+    try:
+        msg,client_addr = server_socket.recvfrom(1024)
+    except Exception as e:
+        server_socket.close()
+        raise e
     print('GOT connection from ',client_addr)
 
     encoded,buffer = cv2.imencode('.jpg', image, [cv2.IMWRITE_JPEG_QUALITY,80])
