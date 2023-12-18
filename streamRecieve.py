@@ -3,7 +3,7 @@
 import cv2, socket
 import numpy as np
 from struct import unpack
-
+from io import BytesIO
 
 from Consts import *
 
@@ -34,7 +34,13 @@ while True:
     data[id] = data
 
     if code == Code.FRAME_END or code == Code.FRAME_SOLO:
-        npdata = np.fromstring(data,dtype=np.uint8)
+
+        data = [packet[1] for packet in sorted(data.items())]
+
+        data_obj = BytesIO(data)
+
+        npdata = np.load(data)
+        
         frame = cv2.imdecode(npdata,1)
         cv2.imshow("RECEIVING VIDEO",frame)
     

@@ -47,6 +47,7 @@ while (cv2.waitKey(10) & 0xFF) != ord("q"):
     
     image_data = BytesIO()
     np.save(image_data, image_encoded)
+    image_data = image_data.read()
 
     packet_id = 0
     
