@@ -17,9 +17,11 @@ port = 9999
 client_socket.sendto(b'Hello',(host_ip,port))
 
 while True:
-
-
-    code, id, data = unpack("BHs", client_socket.recvfrom(PACK_SIZE)[0])
+    try:
+        code, id, data = unpack("BHs", client_socket.recvfrom(PACK_SIZE)[0])
+    except KeyboardInterrupt:
+        print("terminating...")
+        exit()
 
     data = {}
     

@@ -8,12 +8,12 @@ from struct import pack
 
 from Consts import *
 
+print("initializing socket")
 server_socket = socket.socket(socket.AF_INET,socket.SOCK_DGRAM)
 server_socket.setsockopt(socket.SOL_SOCKET,socket.SO_RCVBUF,PACK_SIZE)
 
 server_socket.bind(('0.0.0.0', 9999))
-
-camera = picamera2.Picamera2()
+print("socket initialization complete")
 
 def packet(starting : bool, ending : bool, id : int, data : bytes):
     code = 0
@@ -31,6 +31,7 @@ def terminate():
     return pack("B", Code.CONNECTION_END.value)
 
 print("Waiting for camera to intialize")
+camera = picamera2.Picamera2()
 camera.start()
 time.sleep(1)#sleep statement to allow camera to fully wake up
 print("Camera initialization complete")
