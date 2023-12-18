@@ -26,7 +26,8 @@ try:
         try:
             packet = client_socket.recvfrom(Consts.PACK_SIZE)[0]
         except TimeoutError:
-            Protocol.timeout(client_socket, server_address)
+            print("Timeout")
+            Protocol.initiate(client_socket, server_address)
             continue
 
         #client_socket.sendto(Protocol.encode_simple_packet(Protocol.Code.NORMAL), server_address)
@@ -39,6 +40,8 @@ try:
             break
         elif Protocol.frame_starting(code):
             image_data = {}
+        elif Protocol.connection_timedout(code):
+            Protocol.initiate(client_socket, server_address)
         elif len(image_data) == 0:
             continue
 
@@ -69,8 +72,14 @@ try:
 
         client_socket.sendto(Protocol.encode_simple_packet(Protocol.Code.NORMAL), server_address)
 
-        if cv2.waitKey(1) & 0xFF == ord('q'):
+        key = cv2.waitKey(1) & 0xFF
+
+        if key == ord('q'):
             connected = False
+        elif key == ord('k'):
+            Protocol.kill(client_socket, server_address)
+            connected = False
+
 except KeyboardInterrupt:
     pass
 

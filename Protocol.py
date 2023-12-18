@@ -22,6 +22,7 @@ class Code(Enum):
 
     #clientside
     CONNECTION_START = 5
+    SERVER_KILL = 7
 
 def encode_packet(starting : bool, ending : bool, id : int, data : bytes):
     code = 0
@@ -58,6 +59,9 @@ def initiate(sock, address):
 def timeout(sock, address):
     print("Timeout...")
     sock.sendto(encode_simple_packet(Code.CONNECTION_TIMEOUT), address)
+def kill_server(sock, address):
+    print("Killing server...")
+    sock.sendto(encode_simple_packet(Code.SERVER_KILL), address)
 
 def frame_starting(code : int):
     return code == Code.FRAME_START.value or code == Code.FRAME_SOLO.value
@@ -67,6 +71,8 @@ def connection_starting(code : int):
     return code == Code.CONNECTION_START.value
 def connection_ending(code : int):
     return code == Code.CONNECTION_END.value
+def connection_timedout(code : int):
+    return code == Code.CONNECTION_TIMEOUT.value
 
 def package_data(data : bytes):
     packets = []
