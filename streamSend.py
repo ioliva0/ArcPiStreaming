@@ -42,16 +42,21 @@ print("Camera initialization complete")
 msg,client_addr = server_socket.recvfrom(PACK_SIZE)
 print('GOT connection from ',client_addr)
 
-while (cv2.waitKey(10) & 0xFF) != ord("q"):
+#while (cv2.waitKey(10) & 0xFF) != ord("q"):
+for temp in range(1):
     image = camera.capture_array()
 
     _, image_encoded = cv2.imencode('.jpg', image, [cv2.IMWRITE_JPEG_QUALITY,80])
     
     image_data = BytesIO()
-    np.save(image_data, image_encoded, allow_pickle=True)
+    np.save(image_data, image_encoded, allow_pickle=False)
     image_data.seek(0)
 
     image_data = image_data.read()
+
+    with open("./original.txt", 'w') as out:
+        out.write(str(image_data))
+        out.close()
 
     packet_id = 0
     
@@ -65,11 +70,8 @@ while (cv2.waitKey(10) & 0xFF) != ord("q"):
         if len(image_data) < DATA_SIZE:
             ending = True
 
-        print(image_data[:DATA_SIZE])
 
         data = packet(starting, ending, packet_id, image_data[:DATA_SIZE])
-
-        print(data)
 
         send(data, client_addr)
 
