@@ -23,7 +23,9 @@ def packet(starting : bool, ending : bool, id : int, data : bytes):
     if ending:
         code += Code.FRAME_END.value
 
-    return pack("BHs", code, id, data)
+    metadata = pack(">BH", code, id)
+
+    return metadata + data
 
 def send(packet, address):
     server_socket.sendto(packet, address)
