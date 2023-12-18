@@ -31,7 +31,7 @@ def send(packet, address):
     server_socket.sendto(packet, address)
 
 def terminate():
-    return pack("B", Code.CONNECTION_END.value)
+    return pack(">BH", Code.CONNECTION_END.value, 0)
 
 print("Waiting for camera to intialize")
 camera = picamera2.Picamera2()
@@ -42,8 +42,7 @@ print("Camera initialization complete")
 msg,client_addr = server_socket.recvfrom(PACK_SIZE)
 print('GOT connection from ',client_addr)
 
-#while (cv2.waitKey(10) & 0xFF) != ord("q"):
-for temp in range(1):
+while (cv2.waitKey(1) & 0xFF) != ord("q"):
     image = camera.capture_array()
 
     _, image_encoded = cv2.imencode('.jpg', image, [cv2.IMWRITE_JPEG_QUALITY,80])
@@ -53,10 +52,6 @@ for temp in range(1):
     image_data.seek(0)
 
     image_data = image_data.read()
-
-    with open("./original.txt", 'w') as out:
-        out.write(str(image_data))
-        out.close()
 
     packet_id = 0
     
@@ -81,3 +76,6 @@ for temp in range(1):
         packet_id += 1
 
     cv2.imshow('TRANSMITTING VIDEO',image)
+
+terminate()
+server_socket.close()
