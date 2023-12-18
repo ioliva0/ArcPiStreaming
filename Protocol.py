@@ -43,7 +43,7 @@ def decode_packet(packet : bytes):
     return code, id, data
 
 def encode_simple_packet(code : Code):
-    return pack(">B", code)
+    return pack(">B", code.value)
 def decode_simple_packet(packet : bytes):
     return unpack(">B", packet)
 
