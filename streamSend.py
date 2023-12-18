@@ -25,21 +25,25 @@ print('GOT connection from ',client_addr)
 server_socket.settimeout(1)
 
 connected = True
-while connected:
-    image = camera.capture_array()
 
-    _, image_encoded = cv2.imencode('.jpg', image, [cv2.IMWRITE_JPEG_QUALITY,80])
+try:
+    while connected:
+        image = camera.capture_array()
 
-    packets = Protocol.package_image(image_encoded)
+        _, image_encoded = cv2.imencode('.jpg', image, [cv2.IMWRITE_JPEG_QUALITY,80])
 
-    for packet in packets:
-        server_socket.sendto(packet, client_addr)
+        packets = Protocol.package_image(image_encoded)
 
-        try:
-            if Protocol.connection_ending(Protocol.decode_simple_packet(server_socket.recvfrom(Protocol.CODE_SIZE)[0])):
-                connected = False
-        except TimeoutError:
-            Protocol.timeout(server_socket, client_addr)
+        for packet in packets:
+            server_socket.sendto(packet, client_addr)
+
+            try:
+                if Protocol.connection_ending(Protocol.decode_simple_packet(server_socket.recvfrom(Protocol.CODE_SIZE)[0])):
+                    connected = False
+            except TimeoutError:
+                Protocol.timeout(server_socket, client_addr)
+except KeyboardInterrupt:
+    pass
             
-Protocol.terminate(client_addr)
+Protocol.terminate(server_socket, client_addr)
 server_socket.close()
