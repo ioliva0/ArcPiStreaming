@@ -33,8 +33,8 @@ while connected:
     packets = Protocol.package_image(image_encoded)
 
     for packet in packets:
-        server_socket.send(packet, client_addr)
-        if Protocol.connection_ending(Protocol.decode_simple_packet(server_socket.recvfrom(Protocol.CODE_SIZE))):
+        server_socket.sendto(packet, client_addr)
+        if Protocol.connection_ending(Protocol.decode_simple_packet(server_socket.recvfrom(Protocol.CODE_SIZE)[0])):
             connected = False
 
 Protocol.terminate(client_addr)
