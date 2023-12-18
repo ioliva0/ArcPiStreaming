@@ -20,54 +20,56 @@ Protocol.initiate(client_socket, server_address)
 
 image_data = {}
 
-while True:
-    try:
-        packet = client_socket.recvfrom(Consts.PACK_SIZE)[0]
-    except TimeoutError:
-        Protocol.timeout(client_socket, server_address)
-        continue
+connected = True
+try:
+    while connected:
+        try:
+            packet = client_socket.recvfrom(Consts.PACK_SIZE)[0]
+        except TimeoutError:
+            Protocol.timeout(client_socket, server_address)
+            continue
 
-    client_socket.sendto(Protocol.encode_simple_packet(Protocol.Code.NORMAL), server_address)
+        client_socket.sendto(Protocol.encode_simple_packet(Protocol.Code.NORMAL), server_address)
 
 
-    code, id, data = Protocol.decode_packet(packet)
+        code, id, data = Protocol.decode_packet(packet)
 
-    print(code)
+        if Protocol.connection_ending(code):
+            print("Server connection terminated, killing client...")
+            break
+        elif Protocol.frame_starting(code):
+            image_data = {}
+        elif len(image_data) == 0:
+            continue
 
-    if Protocol.connection_ending(code):
-        print("Server connection terminated, killing client...")
-        break
-    elif Protocol.frame_starting(code):
-        image_data = {}
-    elif len(image_data) == 0:
-        continue
+        image_data[id] = data
 
-    image_data[id] = data
+        if not Protocol.frame_ending(code):
+            continue
+        
+        image_data = sorted(image_data.items())
 
-    if not Protocol.frame_ending(code):
-        continue
-    
-    image_data = sorted(image_data.items())
+        if image_data[-1][0] + 1 > len(image_data):
+            print("Not enough data: must have lost a packet")
 
-    if image_data[-1][0] + 1 > len(image_data):
-        print("Not enough data: must have lost a packet")
+            #NOTE: THIS IS WHERE RESENDING CODE WOULD GO
+            #ASK FOR SPECIFIC PACKETS ENCODED SOMEHOW
 
-        #NOTE: THIS IS WHERE RESENDING CODE WOULD GO
-        #ASK FOR SPECIFIC PACKETS ENCODED SOMEHOW
+            continue
+        
+        image_bytes = b''.join([payload[1] for payload in image_data])
+        image_bytes_obj = BytesIO(image_bytes)
+        encoded_image = np.load(image_bytes_obj, allow_pickle=True)
 
-        continue
-    
-    image_bytes = b''.join([payload[1] for payload in image_data])
-    image_bytes_obj = BytesIO(image_bytes)
-    encoded_image = np.load(image_bytes_obj, allow_pickle=True)
+        image = cv2.imdecode(encoded_image, 1)
+        cv2.imshow("RECEIVING VIDEO", image)
 
-    image = cv2.imdecode(encoded_image, 1)
-    cv2.imshow("RECEIVING VIDEO", image)
+        #print(id)
 
-    #print(id)
+        if cv2.waitKey(1) & 0xFF == ord('q'):
+            connected = False
+except KeyboardInterrupt:
+    pass
 
-    if cv2.waitKey(1) & 0xFF == ord('q'):
-        break
-    
 Protocol.terminate(client_socket, server_address)
 client_socket.close()
