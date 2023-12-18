@@ -20,11 +20,17 @@ camera.start()
 time.sleep(1)#sleep statement to allow camera to fully wake up
 print("Camera initialization complete")
 
-msg,client_addr = server_socket.recvfrom(Consts.PACK_SIZE)
-print('GOT connection from ',client_addr)
-server_socket.settimeout(1)
+connected = False
 
-connected = True
+while not connected:
+    print("waiting for connection...")
+    packet,client_addr = server_socket.recvfrom(Consts.PACK_SIZE)
+    if Protocol.connection_starting(Protocol.decode_simple_packet(packet)):
+        print('GOT connection from ' + str(client_addr))
+        connected = True
+        server_socket.settimeout(1)
+    else:
+        print("Connection recieved, non-initiating")
 
 try:
     while connected:

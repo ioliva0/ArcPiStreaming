@@ -16,19 +16,23 @@ host_ip = "172.17.17.120"
 port = 9999
 server_address = (host_ip, port)
 
-client_socket.sendto(b'Hello',server_address)
+Protocol.initiate(client_socket, server_address)
 
 image_data = {}
 
 while True:
-
     try:
         packet = client_socket.recvfrom(Consts.PACK_SIZE)[0]
     except TimeoutError:
         Protocol.timeout(client_socket, server_address)
+        continue
+
+    client_socket.sendto(Protocol.encode_simple_packet(Protocol.Code.NORMAL), server_address)
 
 
     code, id, data = Protocol.decode_packet(packet)
+
+    print(code)
 
     if Protocol.connection_ending(code):
         print("Server connection terminated, killing client...")
@@ -65,5 +69,5 @@ while True:
     if cv2.waitKey(1) & 0xFF == ord('q'):
         break
     
-
+Protocol.terminate(client_socket, server_address)
 client_socket.close()

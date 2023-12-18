@@ -36,7 +36,8 @@ def encode_packet(starting : bool, ending : bool, id : int, data : bytes):
 def decode_packet(packet : bytes):
 
     if packet[:1] == packet:
-        return decode_simple_packet(packet), None, None
+        code = decode_simple_packet(packet)
+        return code, None, None
 
     code, id = unpack(">BH", packet[:3])
     data = packet[3:]
@@ -45,7 +46,7 @@ def decode_packet(packet : bytes):
 def encode_simple_packet(code : Code):
     return pack(">B", code.value)
 def decode_simple_packet(packet : bytes):
-    return unpack(">B", packet)
+    return unpack(">B", packet)[0]
 
 
 def terminate(sock, address):
