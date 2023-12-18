@@ -77,7 +77,7 @@ try:
         if key == ord('q'):
             connected = False
         elif key == ord('k'):
-            Protocol.kill(client_socket, server_address)
+            Protocol.kill_server(client_socket, server_address)
             connected = False
 
 except KeyboardInterrupt:
