@@ -5,6 +5,7 @@ import cv2, socket
 import numpy as np
 import time
 from struct import pack
+from io import BytesIO
 
 from Consts import *
 
@@ -42,25 +43,28 @@ print('GOT connection from ',client_addr)
 while (cv2.waitKey(10) & 0xFF) != ord("q"):
     image = camera.capture_array()
 
-    _, buffer = cv2.imencode('.jpg', image, [cv2.IMWRITE_JPEG_QUALITY,80])
+    _, image_encoded = cv2.imencode('.jpg', image, [cv2.IMWRITE_JPEG_QUALITY,80])
+    
+    image_data = BytesIO()
+    np.save(image_data, image_encoded)
 
     packet_id = 0
     
-    while len(buffer) > 0:
+    while len(image_data) > 0:
 
         starting = False
         ending = False
 
         if packet_id == 0:
             starting = True
-        if len(buffer) < DATA_SIZE:
+        if len(image_data) < DATA_SIZE:
             ending = True
 
-        data = packet(starting, ending, packet_id, buffer[:DATA_SIZE])
+        data = packet(starting, ending, packet_id, image_data[:DATA_SIZE])
 
         send(data, client_addr)
 
-        buffer = buffer[DATA_SIZE:]
+        image_data = image_data[DATA_SIZE:]
         packet_id += 1
 
     cv2.imshow('TRANSMITTING VIDEO',image)

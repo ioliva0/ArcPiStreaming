@@ -4,6 +4,7 @@ import cv2, socket
 import numpy as np
 from struct import unpack
 
+
 from Consts import *
 
 client_socket = socket.socket(socket.AF_INET,socket.SOCK_DGRAM)
