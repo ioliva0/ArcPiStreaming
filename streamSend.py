@@ -2,19 +2,16 @@ import picamera2
 
 # This is server code to send video frames over UDP
 import cv2, socket
-import numpy as np
 import time
-from struct import pack
-from io import BytesIO
-from time import sleep
 
-from Consts import *
+import Consts
+import Protocol
 
 print("initializing socket")
-server_socket = socket.socket(socket.AF_INET6,socket.SOCK_DGRAM)
-server_socket.setsockopt(socket.SOL_SOCKET,socket.SO_RCVBUF,PACK_SIZE)
+server_socket = socket.socket(socket.AF_INET,socket.SOCK_DGRAM)
+server_socket.setsockopt(socket.SOL_SOCKET,socket.SO_RCVBUF,Consts.PACK_SIZE)
 
-server_socket.bind(('::', 9999, 0, 0))
+server_socket.bind(('0.0.0.0', 9999))
 print("socket initialization complete")
 
 print("Waiting for camera to intialize")
@@ -23,41 +20,22 @@ camera.start()
 time.sleep(1)#sleep statement to allow camera to fully wake up
 print("Camera initialization complete")
 
-msg,client_addr = server_socket.recvfrom(PACK_SIZE)
+msg,client_addr = server_socket.recvfrom(Consts.PACK_SIZE)
 print('GOT connection from ',client_addr)
 server_socket.settimeout(1)
 
-while True:
+connected = True
+while connected:
     image = camera.capture_array()
 
     _, image_encoded = cv2.imencode('.jpg', image, [cv2.IMWRITE_JPEG_QUALITY,80])
-    
-    image_data = BytesIO()
-    np.save(image_data, image_encoded, allow_pickle=True)
-    image_data.seek(0)
 
-    image_data = image_data.read()
+    packets = Protocol.package_image(image_encoded)
 
-    packet_id = 0
-    
-    while len(image_data) > 0:
+    for packet in packets:
+        server_socket.send(packet, client_addr)
+        if Protocol.connection_ending(Protocol.decode_simple_packet(server_socket.recvfrom(Protocol.CODE_SIZE))):
+            connected = False
 
-        starting = False
-        ending = False
-
-        if packet_id == 0:
-            starting = True
-        if len(image_data) < DATA_SIZE:
-            ending = True
-
-
-        data = packet(starting, ending, packet_id, image_data[:DATA_SIZE])
-
-        send(data, client_addr)
-        server_socket.recvfrom(PACK_SIZE)
-
-        image_data = image_data[DATA_SIZE:]
-        packet_id += 1
-
-terminate(client_addr)
+Protocol.terminate(client_addr)
 server_socket.close()
