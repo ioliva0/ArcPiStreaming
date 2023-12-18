@@ -24,7 +24,7 @@ while True:
 
     packet = client_socket.recvfrom(PACK_SIZE)[0]
     code, id = unpack(">BH", packet[:3])
-    data = packet[24:]
+    data = packet[3:]
 
     print(id)
 

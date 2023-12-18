@@ -8,4 +8,4 @@ class Code(Enum):
     CONNECTION_END = 4 
 
 DATA_SIZE = 1000
-PACK_SIZE = DATA_SIZE + 24
+PACK_SIZE = DATA_SIZE + 3
