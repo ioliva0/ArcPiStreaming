@@ -16,8 +16,9 @@ class Code(Enum):
     FRAME_SOLO = 3
     
     #universal
-    CONNECTION_END = 4 
     NORMAL = 0
+    CONNECTION_END = 4 
+    CONNECTION_TIMEOUT = 6
 
     #clientside
     CONNECTION_START = 5
@@ -53,7 +54,9 @@ def terminate(sock, address):
 def initiate(sock, address):
     print("Initiating...")
     sock.sendto(encode_simple_packet(Code.CONNECTION_START), address)
-
+def timeout(sock, address):
+    print("Timeout...")
+    sock.sendto(encode_simple_packet(Code.CONNECTION_TIMEOUT), address)
 
 def frame_starting(code : int):
     return code == Code.FRAME_START.value or code == Code.FRAME_SOLO.value

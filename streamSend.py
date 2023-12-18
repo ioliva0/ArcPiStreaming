@@ -34,8 +34,12 @@ while connected:
 
     for packet in packets:
         server_socket.sendto(packet, client_addr)
-        if Protocol.connection_ending(Protocol.decode_simple_packet(server_socket.recvfrom(Protocol.CODE_SIZE)[0])):
-            connected = False
 
+        try:
+            if Protocol.connection_ending(Protocol.decode_simple_packet(server_socket.recvfrom(Protocol.CODE_SIZE)[0])):
+                connected = False
+        except TimeoutError:
+            Protocol.timeout(server_socket, client_addr)
+            
 Protocol.terminate(client_addr)
 server_socket.close()

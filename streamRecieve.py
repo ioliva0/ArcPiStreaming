@@ -22,7 +22,11 @@ image_data = {}
 
 while True:
 
-    packet = client_socket.recvfrom(Consts.PACK_SIZE)
+    try:
+        packet = client_socket.recvfrom(Consts.PACK_SIZE)[0]
+    except TimeoutError:
+        Protocol.timeout(client_socket, server_address)
+
 
     code, id, data = Protocol.decode_packet(packet)
 
