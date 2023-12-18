@@ -73,6 +73,8 @@ def connection_ending(code : int):
     return code == Code.CONNECTION_END.value
 def connection_timedout(code : int):
     return code == Code.CONNECTION_TIMEOUT.value
+def server_kill_triggered(code : int):
+    return code == Code.SERVER_KILL.value
 
 def package_data(data : bytes):
     packets = []
