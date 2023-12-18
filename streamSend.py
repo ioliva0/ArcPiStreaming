@@ -6,6 +6,7 @@ import numpy as np
 import time
 from struct import pack
 from io import BytesIO
+from time import sleep
 
 from Consts import *
 
@@ -30,8 +31,9 @@ def packet(starting : bool, ending : bool, id : int, data : bytes):
 def send(packet, address):
     server_socket.sendto(packet, address)
 
-def terminate():
-    return pack(">BH", Code.CONNECTION_END.value, 0)
+def terminate(address):
+    print("Terminating...")
+    send(pack(">BH", Code.CONNECTION_END.value, 0), address)
 
 print("Waiting for camera to intialize")
 camera = picamera2.Picamera2()
@@ -41,8 +43,9 @@ print("Camera initialization complete")
 
 msg,client_addr = server_socket.recvfrom(PACK_SIZE)
 print('GOT connection from ',client_addr)
+server_socket.settimeout(1)
 
-while (cv2.waitKey(1) & 0xFF) != ord("q"):
+while True:
     image = camera.capture_array()
 
     _, image_encoded = cv2.imencode('.jpg', image, [cv2.IMWRITE_JPEG_QUALITY,80])
@@ -69,13 +72,10 @@ while (cv2.waitKey(1) & 0xFF) != ord("q"):
         data = packet(starting, ending, packet_id, image_data[:DATA_SIZE])
 
         send(data, client_addr)
-
         server_socket.recvfrom(PACK_SIZE)
 
         image_data = image_data[DATA_SIZE:]
         packet_id += 1
 
-    cv2.imshow('TRANSMITTING VIDEO',image)
-
-terminate()
+terminate(client_addr)
 server_socket.close()
