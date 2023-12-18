@@ -11,29 +11,11 @@ from time import sleep
 from Consts import *
 
 print("initializing socket")
-server_socket = socket.socket(socket.AF_INET,socket.SOCK_DGRAM)
+server_socket = socket.socket(socket.AF_INET6,socket.SOCK_DGRAM)
 server_socket.setsockopt(socket.SOL_SOCKET,socket.SO_RCVBUF,PACK_SIZE)
 
-server_socket.bind(('0.0.0.0', 9999))
+server_socket.bind(('::', 9999, 0, 0))
 print("socket initialization complete")
-
-def packet(starting : bool, ending : bool, id : int, data : bytes):
-    code = 0
-    if starting:
-        code += Code.FRAME_START.value
-    if ending:
-        code += Code.FRAME_END.value
-
-    metadata = pack(">BH", code, id)
-
-    return metadata + data
-
-def send(packet, address):
-    server_socket.sendto(packet, address)
-
-def terminate(address):
-    print("Terminating...")
-    send(pack(">BH", Code.CONNECTION_END.value, 0), address)
 
 print("Waiting for camera to intialize")
 camera = picamera2.Picamera2()

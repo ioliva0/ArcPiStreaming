@@ -7,13 +7,13 @@ from io import BytesIO
 
 from Consts import *
 
-client_socket = socket.socket(socket.AF_INET,socket.SOCK_DGRAM)
+client_socket = socket.socket(socket.AF_INET6,socket.SOCK_DGRAM)
 client_socket.setsockopt(socket.SOL_SOCKET,socket.SO_RCVBUF, PACK_SIZE)
 client_socket.settimeout(1)
 
-host_ip = "172.17.17.120"
+host_ip = "fe80::e3e0:958f:ed12:af11"
 port = 9999
-server_address = (host_ip, port)
+server_address = (host_ip, port, 0, 0)
 
 client_socket.sendto(b'Hello',server_address)
 
