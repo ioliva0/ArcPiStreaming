@@ -46,7 +46,9 @@ while (cv2.waitKey(10) & 0xFF) != ord("q"):
     _, image_encoded = cv2.imencode('.jpg', image, [cv2.IMWRITE_JPEG_QUALITY,80])
     
     image_data = BytesIO()
-    np.save(image_data, image_encoded)
+    np.save(image_data, image_encoded, allow_pickle=True)
+    image_data.seek(0)
+
     image_data = image_data.read()
 
     packet_id = 0
@@ -61,9 +63,15 @@ while (cv2.waitKey(10) & 0xFF) != ord("q"):
         if len(image_data) < DATA_SIZE:
             ending = True
 
+        print(image_data[:DATA_SIZE])
+
         data = packet(starting, ending, packet_id, image_data[:DATA_SIZE])
 
+        print(data)
+
         send(data, client_addr)
+
+        server_socket.recvfrom(PACK_SIZE)
 
         image_data = image_data[DATA_SIZE:]
         packet_id += 1
