@@ -68,11 +68,11 @@ def package_data(data : bytes):
     packets = []
     id = 0
 
-    while len(image_data) > 0:
+    while len(data) > 0:
         curr_packet = encode_packet(id == 0, len(data) <= DATA_SIZE, id, data[:DATA_SIZE])
         packets.append(curr_packet)
 
-        image_data = image_data[DATA_SIZE:]
+        data = data[DATA_SIZE:]
         id += 1
 
     return packets
