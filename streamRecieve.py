@@ -57,12 +57,15 @@ while True:
     
     image_bytes = b''.join([payload[1] for payload in image_data])
     image_bytes_obj = BytesIO(image_bytes)
-    encoded_image = np.load(image_bytes_obj, allow_pickle=False)
+    encoded_image = np.load(image_bytes_obj, allow_pickle=True)
 
     image = cv2.imdecode(encoded_image, 1)
     cv2.imshow("RECEIVING VIDEO", image)
 
+    #print(id)
+
     if cv2.waitKey(1) & 0xFF == ord('q'):
         break
     
+
 client_socket.close()
