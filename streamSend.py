@@ -51,7 +51,7 @@ while True:
     _, image_encoded = cv2.imencode('.jpg', image, [cv2.IMWRITE_JPEG_QUALITY,80])
     
     image_data = BytesIO()
-    np.save(image_data, image_encoded, allow_pickle=False)
+    np.save(image_data, image_encoded, allow_pickle=True)
     image_data.seek(0)
 
     image_data = image_data.read()
