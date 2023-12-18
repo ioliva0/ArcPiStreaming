@@ -9,7 +9,7 @@ import Consts
 import Protocol
 
 client_socket = socket.socket(socket.AF_INET,socket.SOCK_DGRAM)
-client_socket.setsockopt(socket.SOL_SOCKET,socket.SO_RCVBUF, Consts.PACK_SIZE)
+client_socket.setsockopt(socket.SOL_SOCKET,socket.SO_RCVBUF, Consts.PACK_SIZE * Consts.BUFFER_PACKETS)
 client_socket.settimeout(1)
 
 host_ip = "172.17.17.120"
@@ -29,7 +29,7 @@ try:
             Protocol.timeout(client_socket, server_address)
             continue
 
-        client_socket.sendto(Protocol.encode_simple_packet(Protocol.Code.NORMAL), server_address)
+        #client_socket.sendto(Protocol.encode_simple_packet(Protocol.Code.NORMAL), server_address)
 
 
         code, id, data = Protocol.decode_packet(packet)
@@ -56,15 +56,18 @@ try:
             #ASK FOR SPECIFIC PACKETS ENCODED SOMEHOW
 
             continue
-        
-        image_bytes = b''.join([payload[1] for payload in image_data])
-        image_bytes_obj = BytesIO(image_bytes)
-        encoded_image = np.load(image_bytes_obj, allow_pickle=True)
+
+        encoded_image = Protocol.unpack_data(image_data)
 
         image = cv2.imdecode(encoded_image, 1)
+        image = cv2.cvtColor(image, cv2.COLOR_BGR2RGB)
+
+
         cv2.imshow("RECEIVING VIDEO", image)
 
         #print(id)
+
+        client_socket.sendto(Protocol.encode_simple_packet(Protocol.Code.NORMAL), server_address)
 
         if cv2.waitKey(1) & 0xFF == ord('q'):
             connected = False

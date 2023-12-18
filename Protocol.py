@@ -88,3 +88,9 @@ def package_image(image : ndarray):
     image_data.seek(0)
     image_data = image_data.read()
     return package_data(image_data)
+
+def unpack_data(packets : dict):
+    image_bytes = b''.join([packet[1] for packet in packets])
+    image_bytes_obj = BytesIO(image_bytes)
+    image = load(image_bytes_obj, allow_pickle=True)
+    return image
