@@ -1,6 +1,3 @@
-SERVER_IP = "172.17.17.120"
-SERVER_PORT = 9999
-
 PACK_SIZE = 4096
 BUFFER_PACKETS = 10
 JPEG_QUALITY = 50 #1-100, recommended 50-80, higher quality = slower streaming

@@ -10,21 +10,22 @@ DATA_SIZE = PACK_SIZE - METADATA_SIZE
 
 
 class Code(Enum):
-    #serverside
+    # serverside
     FRAME_START = 1
     FRAME_END = 2
     FRAME_SOLO = 3
-    
-    #universal
+
+    # universal
     NORMAL = 0
-    CONNECTION_END = 4 
+    CONNECTION_END = 4
     CONNECTION_TIMEOUT = 6
 
-    #clientside
+    # clientside
     CONNECTION_START = 5
     SERVER_KILL = 7
 
-def encode_packet(starting : bool, ending : bool, id : int, data : bytes):
+
+def encode_packet(starting: bool, ending: bool, id: int, data: bytes):
     code = 0
     if starting:
         code += Code.FRAME_START.value
@@ -34,8 +35,9 @@ def encode_packet(starting : bool, ending : bool, id : int, data : bytes):
     metadata = pack(">BH", code, id)
 
     return metadata + data
-def decode_packet(packet : bytes):
 
+
+def decode_packet(packet: bytes):
     if packet[:1] == packet:
         code = decode_simple_packet(packet)
         return code, None, None
@@ -44,44 +46,67 @@ def decode_packet(packet : bytes):
     data = packet[3:]
     return code, id, data
 
-def encode_simple_packet(code : Code):
+
+def encode_simple_packet(code: Code):
     return pack(">B", code.value)
-def decode_simple_packet(packet : bytes):
+
+
+def decode_simple_packet(packet: bytes):
     return unpack(">B", packet)[0]
 
 
 def terminate(sock, address):
     print("Terminating...")
     sock.sendto(encode_simple_packet(Code.CONNECTION_END), address)
+
+
 def initiate(sock, address):
     print("Initiating...")
     sock.sendto(encode_simple_packet(Code.CONNECTION_START), address)
+
+
 def timeout(sock, address):
     print("Timeout...")
     sock.sendto(encode_simple_packet(Code.CONNECTION_TIMEOUT), address)
+
+
 def kill_server(sock, address):
     print("Killing server...")
     sock.sendto(encode_simple_packet(Code.SERVER_KILL), address)
 
-def frame_starting(code : int):
+
+def frame_starting(code: int):
     return code == Code.FRAME_START.value or code == Code.FRAME_SOLO.value
-def frame_ending(code : int):
+
+
+def frame_ending(code: int):
     return code == Code.FRAME_END.value or code == Code.FRAME_SOLO.value
-def connection_starting(code : int):
+
+
+def connection_starting(code: int):
     return code == Code.CONNECTION_START.value
-def connection_ending(code : int):
+
+
+def connection_ending(code: int):
     return code == Code.CONNECTION_END.value
-def connection_timedout(code : int):
+
+
+def connection_timedout(code: int):
     return code == Code.CONNECTION_TIMEOUT.value
-def server_kill_triggered(code : int):
+
+
+def server_kill_triggered(code: int):
     return code == Code.SERVER_KILL.value
 
-def package_data(data : bytes):
+
+def package_data(data: bytes):
     packets = []
     id = 0
 
     while len(data) > 0:
-        curr_packet = encode_packet(id == 0, len(data) <= DATA_SIZE, id, data[:DATA_SIZE])
+        curr_packet = encode_packet(
+            id == 0, len(data) <= DATA_SIZE, id, data[:DATA_SIZE]
+        )
         packets.append(curr_packet)
 
         data = data[DATA_SIZE:]
@@ -89,7 +114,8 @@ def package_data(data : bytes):
 
     return packets
 
-def package_image(image : ndarray):
+
+def package_image(image: ndarray):
     image_data = BytesIO()
     save(image_data, image, allow_pickle=True)
 
@@ -97,8 +123,9 @@ def package_image(image : ndarray):
     image_data = image_data.read()
     return package_data(image_data)
 
-def unpack_data(packets : dict):
-    image_bytes = b''.join([packet[1] for packet in packets])
+
+def unpack_data(packets: dict):
+    image_bytes = b"".join([packet[1] for packet in packets])
     image_bytes_obj = BytesIO(image_bytes)
     image = load(image_bytes_obj, allow_pickle=True)
     return image
