@@ -5,7 +5,7 @@ server_socket, camera = Server.init()
 listening = True
 
 while listening:
-    client_addr = Server.wait_for_connection()
+    client_addr = Server.wait_for_connection(server_socket)
     connection = (server_socket, client_addr)
     connected = True
     
