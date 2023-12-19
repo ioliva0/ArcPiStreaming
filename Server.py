@@ -61,7 +61,6 @@ def wait_for_connection():
                 print("Connection recieved, non-initiating")
 
         print("GOT connection from " + str(Network.client_address))
-        Network.server_socket.settimeout(1)
 
     except KeyboardInterrupt:
         killKey()
