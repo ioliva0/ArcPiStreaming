@@ -49,7 +49,7 @@ def wait_for_connection():
         while not connected:
             print("waiting for connection...")
             try:
-                packet, client_address = Network.server_socket.recvfrom(
+                packet, Network.client_address = Network.server_socket.recvfrom(
                     Consts.PACK_SIZE
                 )
             except TimeoutError:
@@ -60,9 +60,9 @@ def wait_for_connection():
             else:
                 print("Connection recieved, non-initiating")
 
-        print("GOT connection from " + str(client_address))
+        print("GOT connection from " + str(Network.client_address))
         Network.server_socket.settimeout(1)
-        return client_address
+
     except KeyboardInterrupt:
         killKey()
 
