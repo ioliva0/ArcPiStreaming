@@ -1,4 +1,4 @@
-import src.Server as Server
+from afpistream import Server
 
 Server.init()
 
