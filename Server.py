@@ -15,7 +15,7 @@ def init():
         socket.SOL_SOCKET, socket.SO_RCVBUF, Consts.PACK_SIZE
     )
 
-    Network.server_socket.bind(("0.0.0.0", Consts.SERVER_PORT))
+    Network.server_socket.bind(("0.0.0.0", Network.server_address[1]))
     print("socket initialization complete")
 
     print("Waiting for camera to intialize")
