@@ -1,16 +1,14 @@
 
 # This is client code to receive video frames over UDP
 import cv2, socket
-import numpy as np
 from struct import unpack
-from io import BytesIO
 
 import Consts
 import Protocol
 
 client_socket = socket.socket(socket.AF_INET,socket.SOCK_DGRAM)
 client_socket.setsockopt(socket.SOL_SOCKET,socket.SO_RCVBUF, Consts.PACK_SIZE * Consts.BUFFER_PACKETS)
-client_socket.settimeout(1)
+client_socket.settimeout(2)
 
 host_ip = "172.17.17.120"
 port = 9999
@@ -42,6 +40,7 @@ try:
             image_data = {}
         elif Protocol.connection_timedout(code):
             Protocol.initiate(client_socket, server_address)
+            continue
         elif len(image_data) == 0:
             continue
 
@@ -50,23 +49,23 @@ try:
         if not Protocol.frame_ending(code):
             continue
         
-        image_data = sorted(image_data.items())
+        try:
+            image_data = sorted(image_data.items())
+        except AttributeError:
+            print("An unknown bug occurred receiving the current frame")
+            continue
 
         if image_data[-1][0] + 1 > len(image_data):
-            print("Not enough data: must have lost a packet")
-
+            print("Lost packet, skipping frame")
+            image_data = {}
             #NOTE: THIS IS WHERE RESENDING CODE WOULD GO
             #ASK FOR SPECIFIC PACKETS ENCODED SOMEHOW
-
             continue
 
         encoded_image = Protocol.unpack_data(image_data)
-
         image = cv2.imdecode(encoded_image, 1)
-        image = cv2.cvtColor(image, cv2.COLOR_BGR2RGB)
-
-
         cv2.imshow("RECEIVING VIDEO", image)
+        
 
         #print(id)
 
