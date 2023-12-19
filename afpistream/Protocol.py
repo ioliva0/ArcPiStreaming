@@ -1,28 +1,34 @@
 from struct import pack, unpack
-from Consts import *
 from enum import Enum
 from numpy import save, load, ndarray
 from io import BytesIO
 
+from afpistream import Consts
+
 CODE_SIZE = 1
 METADATA_SIZE = 3
-DATA_SIZE = PACK_SIZE - METADATA_SIZE
+DATA_SIZE = Consts.PACK_SIZE - METADATA_SIZE
 
 
 class Code(Enum):
-    # serverside
-    FRAME_START = 1
-    FRAME_END = 2
-    FRAME_SOLO = 3
-
     # universal
     NORMAL = 0
-    CONNECTION_END = 4
-    CONNECTION_TIMEOUT = 6
+    CONNECTION_END = 1
+    CONNECTION_TIMEOUT = 2
 
-    # clientside
-    CONNECTION_START = 5
+    # serverside
+    FRAME_START = 3
+    FRAME_END = 4
+    FRAME_SOLO = 5
+
+    # general client commands
+    CONNECTION_START = 6
     SERVER_KILL = 7
+
+    # client requests
+    REQUEST_FRAME = 8
+    REQUEST_STREAM_START = 9
+    REQUEST_STREAM_STOP = 10
 
 
 def encode_packet(starting: bool, ending: bool, id: int, data: bytes):
@@ -75,6 +81,21 @@ def kill_server(sock, address):
     sock.sendto(encode_simple_packet(Code.SERVER_KILL), address)
 
 
+def request_frame(sock, address):
+    print("Requesting frame...")
+    sock.sendto(encode_simple_packet(Code.REQUEST_FRAME), address)
+
+
+def request_stream_start(sock, address):
+    print("Requesting stream start...")
+    sock.sendto(encode_simple_packet(Code.REQUEST_STREAM_START), address)
+
+
+def request_stream_start(sock, address):
+    print("Requesting stream stop...")
+    sock.sendto(encode_simple_packet(Code.REQUEST_STREAM_STOP), address)
+
+
 def frame_starting(code: int):
     return code == Code.FRAME_START.value or code == Code.FRAME_SOLO.value
 
@@ -97,6 +118,18 @@ def connection_timedout(code: int):
 
 def server_kill_triggered(code: int):
     return code == Code.SERVER_KILL.value
+
+
+def frame_requested(code: int):
+    return code == Code.REQUEST_FRAME
+
+
+def stream_start_requested(code: int):
+    return code == Code.REQUEST_STREAM_START
+
+
+def stream_stop_requested(code: int):
+    return code == Code.REQUEST_STREAM_STOP
 
 
 def package_data(data: bytes):

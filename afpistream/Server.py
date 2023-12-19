@@ -3,10 +3,7 @@ import picamera2
 import cv2
 import time
 
-import Consts
-import Protocol
-import Network
-
+from afpistream import Consts, Protocol, Network
 
 def init():
     print("initializing socket")
@@ -32,7 +29,7 @@ def init():
 
 def close():
     Network.camera.stop()
-    Network.server_socket.stop()
+    Network.server_socket.close()
 
 
 def killKey():

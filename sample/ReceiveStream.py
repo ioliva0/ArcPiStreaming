@@ -1,4 +1,4 @@
-import Client
+from afpistream import Client
 
 Client.init()
 

@@ -1,9 +1,10 @@
 import cv2
 import socket
 
-import Consts
-import Protocol
-import Network
+from afpistream import Consts, Protocol, Network
+
+def connect():
+    Protocol.initiate(Network.client_socket, Network.server_address)
 
 
 def init():
@@ -13,7 +14,7 @@ def init():
     )
     Network.client_socket.settimeout(2)
 
-    Protocol.initiate(Network.client_socket, Network.server_address)
+    connect()
 
 
 def listen():
@@ -21,7 +22,7 @@ def listen():
         packet = Network.client_socket.recvfrom(Consts.PACK_SIZE)[0]
     except TimeoutError:
         print("Timeout")
-        Protocol.initiate(Network.client_socket, Network.server_address)
+        connect()
         return None
 
     return Protocol.decode_packet(packet)
@@ -45,7 +46,7 @@ def process_packet(image_data, code, id, data):
         close()
         exit()
     elif Protocol.connection_timedout(code):
-        Protocol.initiate(Network.client_socket, Network.server_address)
+        connect()
         return False, image_data
 
     elif Protocol.frame_starting(code):

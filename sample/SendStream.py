@@ -1,4 +1,4 @@
-import Server
+import src.Server as Server
 
 Server.init()
 
