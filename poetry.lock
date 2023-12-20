@@ -67,4 +67,4 @@ numpy = {version = ">=1.23.5", markers = "python_version >= \"3.11\""}
 [metadata]
 lock-version = "2.0"
 python-versions = "^3.11"
-content-hash = "d3636e1c6d905174c907f42d1641647d3d7edc79ad3f17aadc9de8ee0e799171"
+content-hash = "f802a7d6c676522fc85c01f1f68ceb067fd9cbd95d834db0d119c9c3f448f5b9"

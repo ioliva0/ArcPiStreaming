@@ -71,11 +71,12 @@ def listen():
     """
 
     connected = True
-
+    print("got here")
     try:
         code = Protocol.decode_simple_packet(
             Network.server_socket.recvfrom(Protocol.CODE_SIZE)[0]
         )
+        print(code)
         if Protocol.server_kill_triggered(code):
             Protocol.terminate(Network.server_socket, Network.client_address)
             close()

@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "afpistream"
-version = "1.0.1"
+version = "1.0.21"
 description = "Image and video streaming over WIFI from a Raspberry Pi camera. Intended for drone photography"
 authors = ["Animus Ferus Blue"]
 license = "MIT"
@@ -9,7 +9,7 @@ readme = "README.md"
 [tool.poetry.dependencies]
 python = "^3.11"
 opencv-python = "^4.7.0.0"
-numpy = "^1.26.2"
+numpy = "^1.20.0"
 
 [build-system]
 requires = ["poetry-core"]
