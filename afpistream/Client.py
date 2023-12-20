@@ -3,6 +3,7 @@ import socket
 
 from afpistream import Consts, Protocol, Network
 
+
 def connect():
     Protocol.initiate(Network.client_socket, Network.server_address)
 
@@ -81,7 +82,7 @@ def extract_image(image_data):
     except ValueError:
         print("Corrupted packet, skipping frame")
         return None
-    
+
     return cv2.imdecode(encoded_image, 1)
 
 
@@ -90,12 +91,14 @@ def respond():
         Protocol.encode_simple_packet(Protocol.Code.NORMAL), Network.server_address
     )
 
+
 def display(image):
     cv2.imshow("RECEIVING VIDEO", image)
 
     key = cv2.waitKey(1) & 0xFF
 
     if key == ord("q"):
+        Protocol.terminate(Network.client_socket, Network.server_address)
         exit()
     elif key == ord("k"):
         Protocol.kill_server(Network.client_socket, Network.server_address)

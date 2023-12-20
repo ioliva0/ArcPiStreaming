@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "afpistream"
-version = "1.0.21"
+version = "1.0.3"
 description = "Image and video streaming over WIFI from a Raspberry Pi camera. Intended for drone photography"
 authors = ["Animus Ferus Blue"]
 license = "MIT"
