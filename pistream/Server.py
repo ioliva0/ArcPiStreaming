@@ -3,7 +3,7 @@ import picamera2
 import cv2
 import time
 
-from afpistream import Consts, Protocol, Network
+from pistream import Consts, Protocol, Network
 
 
 def init():

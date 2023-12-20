@@ -3,7 +3,7 @@ from enum import Enum
 from numpy import save, load, ndarray
 from io import BytesIO
 
-from afpistream import Consts
+from pistream import Consts
 
 CODE_SIZE = 1
 METADATA_SIZE = 3

@@ -1,4 +1,4 @@
-from afpistream import Server
+from pistream import Server
 
 Server.init()
 

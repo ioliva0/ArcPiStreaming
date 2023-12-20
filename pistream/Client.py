@@ -1,7 +1,7 @@
 import cv2
 import socket
 
-from afpistream import Consts, Protocol, Network
+from pistream import Consts, Protocol, Network
 
 
 def connect():
