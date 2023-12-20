@@ -5,6 +5,7 @@ import time
 
 from afpistream import Consts, Protocol, Network
 
+
 def init():
     print("initializing socket")
     Network.server_socket = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
@@ -63,7 +64,7 @@ def wait_for_connection():
         killKey()
 
 
-def listen(server_socket, client_address):
+def listen():
     """
     Return value: connected
     if connected is false, the client has disconnected from the server and the server should start looking for a new client
@@ -73,17 +74,17 @@ def listen(server_socket, client_address):
 
     try:
         code = Protocol.decode_simple_packet(
-            server_socket.recvfrom(Protocol.CODE_SIZE)[0]
+            Network.server_socket.recvfrom(Protocol.CODE_SIZE)[0]
         )
         if Protocol.server_kill_triggered(code):
-            Protocol.terminate(server_socket, client_address)
+            Protocol.terminate(Network.server_socket, Network.client_address)
             close()
             exit()
         elif Protocol.connection_ending(code):
-            Protocol.terminate(server_socket, client_address)
+            Protocol.terminate(Network.server_socket, Network.client_address)
             connected = False
     except TimeoutError:
-        Protocol.timeout(server_socket, client_address)
+        Protocol.timeout(Network.server_socket, Network.client_address)
         connected = False
 
     return connected
@@ -102,6 +103,6 @@ def send_image():
         for packet in packets:
             Network.server_socket.sendto(packet, Network.client_address)
 
-        return listen
+        return listen()
     except KeyboardInterrupt:
         killKey()

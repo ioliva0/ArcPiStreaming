@@ -76,7 +76,12 @@ def extract_image(image_data):
         # ASK FOR SPECIFIC PACKETS ENCODED SOMEHOW
         return None
 
-    encoded_image = Protocol.unpack_data(image_data)
+    try:
+        encoded_image = Protocol.unpack_data(image_data)
+    except ValueError:
+        print("Corrupted packet, skipping frame")
+        return None
+    
     return cv2.imdecode(encoded_image, 1)
 
 
@@ -84,7 +89,6 @@ def respond():
     Network.client_socket.sendto(
         Protocol.encode_simple_packet(Protocol.Code.NORMAL), Network.server_address
     )
-
 
 def display(image):
     cv2.imshow("RECEIVING VIDEO", image)
