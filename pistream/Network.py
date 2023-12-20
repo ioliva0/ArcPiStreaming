@@ -4,3 +4,6 @@ camera = None
 
 client_socket = None
 client_address = None
+
+frame_requested = False
+stream_requested = False

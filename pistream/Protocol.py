@@ -30,6 +30,9 @@ class Code(Enum):
     REQUEST_STREAM_START = 9
     REQUEST_STREAM_STOP = 10
 
+    REQUEST_ENABLE_TIMEOUT = 11
+    REQUEST_DISABLE_TIMEOUT = 12
+
 
 def encode_packet(starting: bool, ending: bool, id: int, data: bytes):
     code = 0
@@ -66,7 +69,7 @@ def terminate(sock, address):
     sock.sendto(encode_simple_packet(Code.CONNECTION_END), address)
 
 
-def initiate(sock, address):
+def start_connection(sock, address):
     print("Initiating...")
     sock.sendto(encode_simple_packet(Code.CONNECTION_START), address)
 
@@ -91,9 +94,23 @@ def request_stream_start(sock, address):
     sock.sendto(encode_simple_packet(Code.REQUEST_STREAM_START), address)
 
 
-def request_stream_start(sock, address):
+def request_stream_stop(sock, address):
     print("Requesting stream stop...")
     sock.sendto(encode_simple_packet(Code.REQUEST_STREAM_STOP), address)
+
+
+def request_enable_timeout(sock, address):
+    print("Requesting timeout enable...")
+    sock.sendto(encode_simple_packet(Code.REQUEST_ENABLE_TIMEOUT), address)
+
+
+def request_disable_timeout(sock, address):
+    print("Requesting timeout disable...")
+    sock.sendto(encode_simple_packet(Code.REQUEST_DISABLE_TIMEOUT), address)
+
+
+def is_normal(code: int):
+    return code == Code.NORMAL.value
 
 
 def frame_starting(code: int):
@@ -121,15 +138,23 @@ def server_kill_triggered(code: int):
 
 
 def frame_requested(code: int):
-    return code == Code.REQUEST_FRAME
+    return code == Code.REQUEST_FRAME.value
 
 
 def stream_start_requested(code: int):
-    return code == Code.REQUEST_STREAM_START
+    return code == Code.REQUEST_STREAM_START.value
 
 
 def stream_stop_requested(code: int):
-    return code == Code.REQUEST_STREAM_STOP
+    return code == Code.REQUEST_STREAM_STOP.value
+
+
+def timeout_enable_requested(code: int):
+    return code == Code.REQUEST_ENABLE_TIMEOUT.value
+
+
+def timeout_disable_requested(code: int):
+    return code == Code.REQUEST_DISABLE_TIMEOUT.value
 
 
 def package_data(data: bytes):

@@ -28,6 +28,14 @@ def init():
     print("camera initialization complete")
 
 
+def enable_timeout(seconds: int = 10):
+    Network.server_socket.settimeout(seconds)
+
+
+def disable_timeout():
+    Network.server_socket.settimeout(None)
+
+
 def close():
     Network.camera.stop()
     Network.server_socket.close()
@@ -64,29 +72,61 @@ def wait_for_connection():
         killKey()
 
 
+def handle_command(code):
+    """
+    Return value: connected
+    if connected is false, the client has disconnected from the server and the server should start looking for a new client
+    """
+
+    if Protocol.is_normal(code) or Protocol.connection_starting(code):
+        return True
+
+    if Protocol.server_kill_triggered(code):
+        Protocol.terminate(Network.server_socket, Network.client_address)
+        close()
+        exit()
+
+    if Protocol.connection_ending(code):
+        Protocol.terminate(Network.server_socket, Network.client_address)
+        return False
+
+    if Protocol.timeout_enable_requested(code):
+        enable_timeout()
+        return True
+    if Protocol.timeout_disable_requested(code):
+        disable_timeout()
+        return True
+
+    if Protocol.frame_requested(code):
+        Network.frame_requested = True
+        return True
+    if Protocol.stream_start_requested(code):
+        Network.stream_requested = True
+        return True
+    if Protocol.stream_stop_requested(code):
+        Network.stream_requested = False
+        return True
+
+    print("Invalid command sent to server")
+    return False
+
+
 def listen():
     """
     Return value: connected
     if connected is false, the client has disconnected from the server and the server should start looking for a new client
     """
 
-    connected = True
     try:
-        code = Protocol.decode_simple_packet(
-            Network.server_socket.recvfrom(Protocol.CODE_SIZE)[0]
-        )
-        if Protocol.server_kill_triggered(code):
-            Protocol.terminate(Network.server_socket, Network.client_address)
-            close()
-            exit()
-        elif Protocol.connection_ending(code):
-            Protocol.terminate(Network.server_socket, Network.client_address)
-            connected = False
+        packet = Network.server_socket.recvfrom(Protocol.CODE_SIZE)[0]
+        code = Protocol.decode_simple_packet(packet)
+        return handle_command(code)
+
     except TimeoutError:
         Protocol.timeout(Network.server_socket, Network.client_address)
-        connected = False
-
-    return connected
+    except Exception:
+        print("Error getting client response, this should never happen")
+    return True
 
 
 def send_image():
@@ -103,5 +143,23 @@ def send_image():
             Network.server_socket.sendto(packet, Network.client_address)
 
         return listen()
+    except KeyboardInterrupt:
+        killKey()
+
+
+def serve():
+    try:
+        if not listen():
+            return False
+
+        if Network.frame_requested:
+            Network.frame_requested = False
+            return send_image()
+
+        elif Network.stream_requested:
+            return send_image()
+
+        return True
+
     except KeyboardInterrupt:
         killKey()

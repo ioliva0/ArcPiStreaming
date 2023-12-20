@@ -5,7 +5,7 @@ from pistream import Consts, Protocol, Network
 
 
 def connect():
-    Protocol.initiate(Network.client_socket, Network.server_address)
+    Protocol.start_connection(Network.client_socket, Network.server_address)
 
 
 def init():
@@ -16,6 +16,30 @@ def init():
     Network.client_socket.settimeout(2)
 
     connect()
+
+
+def request_frame():
+    Protocol.request_frame(Network.client_socket, Network.server_address)
+
+
+def request_stream_start():
+    Protocol.request_stream_start(Network.client_socket, Network.server_address)
+
+
+def request_stream_stop():
+    Protocol.request_stream_stop(Network.client_socket, Network.server_address)
+
+
+def request_enable_timeout():
+    Protocol.request_enable_timeout(Network.client_socket, Network.server_address)
+
+
+def request_disable_timeout():
+    Protocol.request_disable_timeout(Network.client_socket, Network.server_address)
+
+
+def kill_server():
+    Protocol.kill_server(Network.client_socket, Network.server_address)
 
 
 def listen():
@@ -101,7 +125,7 @@ def display(image):
         Protocol.terminate(Network.client_socket, Network.server_address)
         exit()
     elif key == ord("k"):
-        Protocol.kill_server(Network.client_socket, Network.server_address)
+        kill_server()
         exit()
 
 
