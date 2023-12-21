@@ -8,7 +8,9 @@ def connect():
     Protocol.start_connection(Network.client_socket, Network.server_address)
 
 
-def init():
+def init(ip, port):
+    Network.server_address = (ip, port)
+
     Network.client_socket = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
     Network.client_socket.setsockopt(
         socket.SOL_SOCKET, socket.SO_RCVBUF, Consts.PACK_SIZE * Consts.BUFFER_PACKETS
