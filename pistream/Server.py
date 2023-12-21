@@ -6,7 +6,7 @@ import time
 from pistream import Consts, Protocol, Network
 
 
-def init(port):
+def init(port: int = 9999):
     Network.server_address = ("0.0.0.0", port)
 
     print("initializing socket")
