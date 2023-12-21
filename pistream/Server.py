@@ -6,7 +6,9 @@ import time
 from pistream import Consts, Protocol, Network
 
 
-def init():
+def init(ip, port):
+    Network.server_address = (ip, port)
+
     print("initializing socket")
     Network.server_socket = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
     Network.server_socket.setsockopt(
@@ -26,6 +28,48 @@ def init():
     Network.camera.start()
     time.sleep(1)  # sleep statement to allow camera to fully wake up
     print("camera initialization complete")
+
+
+def set_quality(quality: int = 50):
+    """
+    MAKE SURE TO SET BEFORE INITIALIZING THE SERVER\n
+    Images are compressed as jpegs before getting sent over the network\n
+    quality, from 1 to 100, is how much quality is preserved when compressing\n
+    a higher number means a better quality image but lower framerates\n
+    default: 50\n
+    recommended quality: 50 to 80\n
+    """
+    if quality >= 1 and quality <= 100:
+        Consts.JPEG_QUALITY = quality
+    else:
+        raise ValueError("Quality must be between 1 and 100")
+
+
+def set_resolution(resolution: tuple = (1920, 1080)):
+    """
+    MAKE SURE TO SET BEFORE INITIALIZING THE SERVER\n
+    The width and height, in pixels, of transmitted images\n
+    check your Raspberry Pi's camera to see its max resolution\n
+    The smaller the image, the higher the framerate you'll be able to stream at\n
+    you can use any aspect ratio you want\n
+    Default: (1920, 1080), aka 1080p or Full HD\n
+    Recommended: (480, 270) up to your camera's max resolution
+    """
+
+    Consts.RESOLUTION = resolution
+
+
+def set_exposure(exposure: int = 130000):
+    """
+    MAKE SURE TO SET BEFORE INITIALIZING THE SERVER\n
+    The level of exposure of the pi's camera\n
+    Optimal levels vary by application\n
+    In general, a higher exposure means a brighter image\n
+    Default: 130,000\n
+    Recommended: 50,000 to 200,000
+    """
+
+    Consts.EXPOSURE = exposure
 
 
 def enable_timeout(seconds: int = 10):
@@ -149,9 +193,6 @@ def send_image():
 
 def serve():
     try:
-        if not listen():
-            return False
-
         if Network.frame_requested:
             Network.frame_requested = False
             return send_image()
@@ -159,7 +200,7 @@ def serve():
         elif Network.stream_requested:
             return send_image()
 
-        return True
+        return listen()
 
     except KeyboardInterrupt:
         killKey()
